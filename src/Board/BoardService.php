@@ -6,6 +6,7 @@ use JiraRestApi\Configuration\ConfigurationInterface;
 use JiraRestApi\Epic\Epic;
 use JiraRestApi\Issue\AgileIssue;
 use JiraRestApi\Sprint\Sprint;
+use JiraRestApi\Sprint\SprintSearchResult;
 use Psr\Log\LoggerInterface;
 
 class BoardService extends \JiraRestApi\JiraClient
@@ -103,17 +104,19 @@ class BoardService extends \JiraRestApi\JiraClient
     }
 
     /**
-     * @return \ArrayObject|Sprint[]|null
+     * @return SprintSearchResult|null
      */
-    public function getBoardSprints($boardId, $paramArray = []): ?\ArrayObject
+    public function getBoardSprints($boardId, $paramArray = []): ?SprintSearchResult
     {
-        $json = $this->exec($this->uri.'/'.$boardId.'/sprint'.$this->toHttpQueryParameter($paramArray), null);
+        $ret = $this->exec($this->uri.'/'.$boardId.'/sprint'.$this->toHttpQueryParameter($paramArray), null);
 
         try {
-            return $this->json_mapper->mapArray(
-                json_decode($json, false, 512, $this->getJsonOptions())->values,
-                new \ArrayObject(),
-                Sprint::class
+            $json = json_decode($ret);
+            $json->issues = $json->values;
+            unset($json->values);
+            return $this->json_mapper->map(
+                $json,
+                new SprintSearchResult()
             );
         } catch (\JsonException $exception) {
             $this->log->error("Response cannot be decoded from json\nException: {$exception->getMessage()}");

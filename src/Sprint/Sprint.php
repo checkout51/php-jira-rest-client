@@ -55,6 +55,11 @@ class Sprint implements \JsonSerializable
         return $this;
     }
 
+    public function getStartDate(): string
+    {
+        return $this->startDate ?? '';
+    }
+
     public function setStartDateAsDateTime(\DateTimeInterface $startDate, string $format = 'Y-m-d'): static
     {
         $this->startDate = $startDate->format($format);
@@ -67,6 +72,11 @@ class Sprint implements \JsonSerializable
         $this->startDate = $startDate;
 
         return $this;
+    }
+
+    public function getEndDate(): string
+    {
+        return $this->endDate ?? '';
     }
 
     public function setEndDateAsDateTime(\DateTimeInterface $endDate, string $format = 'Y-m-d'): static
