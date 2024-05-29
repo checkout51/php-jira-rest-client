@@ -47,6 +47,28 @@ class SprintService extends JiraClient
         );
     }
 
+    public function getSprintReport($boardId, string|int $sprintId): SprintReport
+    {
+        $this->setAPIUri('/rest/greenhopper/latest');
+        $ret = $this->exec('/rapid/charts/sprintreport'.$this->toHttpQueryParameter(['rapidViewId' => $boardId, 'sprintId' => $sprintId]));
+
+        $json = json_decode($ret);
+        $json->sprint->startDate = $json->sprint->isoStartDate;
+        $json->sprint->endDate = $json->sprint->isoEndDate;
+        if ($json->contents) {
+            foreach ($json->contents as $key => $value) {
+                $json->$key = $value;
+
+            }
+            unset($json->contents);
+        }
+
+        return $this->json_mapper->map(
+            $json,
+            new SprintReport()
+        );
+    }
+
     /**
      * @throws JiraException
      * @throws \JsonMapper_Exception
